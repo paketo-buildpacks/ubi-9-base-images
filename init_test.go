@@ -153,6 +153,7 @@ func TestAcceptance(t *testing.T) {
 
 	suite := spec.New("Acceptance", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Metadata", testMetadata)
+	suite("NodejsStackIntegration", testNodejsStackIntegration)
 	suite("buildpackIntegration", testBuildpackIntegration)
 	suite.Run(t)
 
@@ -160,7 +161,7 @@ func TestAcceptance(t *testing.T) {
 	lifecycleImageID, err := utils.GetLifecycleImageID(docker, builder.imageUrl)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = utils.RemoveImages(docker, []string{lifecycleImageID})
+	err = utils.RemoveImages(docker, []string{lifecycleImageID, builder.runImageUrl, builder.imageUrl})
 	Expect(err).NotTo(HaveOccurred())
 
 }
