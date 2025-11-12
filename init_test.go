@@ -154,6 +154,7 @@ func TestAcceptance(t *testing.T) {
 	suite := spec.New("Acceptance", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Metadata", testMetadata)
 	suite("buildpackIntegration", testBuildpackIntegration)
+	suite("NodejsStackIntegration", testNodejsBaseImagesIntegration)
 	suite.Run(t)
 
 	/** Cleanup **/
