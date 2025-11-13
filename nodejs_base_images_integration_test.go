@@ -17,7 +17,7 @@ import (
 	utils "github.com/paketo-buildpacks/ubi-9-base-images/internal/utils"
 )
 
-func testNodejsStackIntegration(t *testing.T, context spec.G, it spec.S) {
+func testNodejsBaseImagesIntegration(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
