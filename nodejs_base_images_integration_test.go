@@ -33,6 +33,9 @@ func testNodejsBaseImagesIntegration(t *testing.T, context spec.G, it spec.S) {
 		container occam.Container
 
 		bpUbiRunImageOverrideImageID string
+
+		runImageUrl     string
+		builderImageUrl string
 	)
 
 	it.Before(func() {
@@ -56,7 +59,7 @@ func testNodejsBaseImagesIntegration(t *testing.T, context spec.G, it spec.S) {
 			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
 			Expect(os.RemoveAll(source)).To(Succeed())
-			Expect(docker.Image.Remove.Execute(bpUbiRunImageOverrideImageID)).To(Succeed())
+			Expect(utils.RemoveImages(docker, []string{bpUbiRunImageOverrideImageID, runImageUrl, builderImageUrl})).To(Succeed())
 		})
 
 		nodejsRegex, _ := regexp.Compile("^nodejs")
@@ -70,6 +73,13 @@ func testNodejsBaseImagesIntegration(t *testing.T, context spec.G, it spec.S) {
 			}
 
 			it(fmt.Sprintf("it successfully builds an app using %s run image", stack.Name), func() {
+				_, runImageUrl, builderImageUrl, err = utils.GenerateBuilder(
+					filepath.Join(root, DefaultStack.OutputDir, "build.oci"),
+					filepath.Join(root, stack.OutputDir, "run.oci"),
+					RegistryUrl,
+				)
+				Expect(err).NotTo(HaveOccurred())
+
 				runArchive := filepath.Join(root, stack.OutputDir, "run.oci")
 				bpUbiRunImageOverrideImageID, err = utils.PushFileToLocalRegistry(runArchive, RegistryUrl, fmt.Sprintf("run-%s-%s", stack.Name, uuid.NewString()))
 				Expect(err).NotTo(HaveOccurred())
@@ -81,7 +91,7 @@ func testNodejsBaseImagesIntegration(t *testing.T, context spec.G, it spec.S) {
 					WithBuildpacks(
 						settings.Buildpacks.Nodejs.Online,
 					).
-					WithBuilder(builder.imageUrl).
+					WithBuilder(builderImageUrl).
 					WithNetwork("host").
 					WithEnv(map[string]string{"BP_UBI_RUN_IMAGE_OVERRIDE": bpUbiRunImageOverrideImageID}).
 					WithPullPolicy("always").
